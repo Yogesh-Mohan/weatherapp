@@ -24,5 +24,21 @@ def home(request):
 
             else:
                 messages.error(request, "City Already Exists!")
-            form=CityForm()
-    return render(request, 'WeatherApp.html',{'form':form})
+    form=CityForm()
+    cities=City.objects.all()
+    data=[]
+    for city in cities:
+        res=requests.get(Url.format(city)).json()
+        print(res)
+        city_weather={
+            'city':city,
+            'temperature':res['main']['temp'],
+            'description':res['weather'][0]['description'],
+            'country':res['sys']['country'],
+            'humidity':res['main']['humidity'],
+            'icon':res['weather'][0]['icon'],
+        }
+        data.append(city_weather)
+    context={'data':data,'form':form}
+
+    return render(request, 'WeatherApp.html',context)
